@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccination QCM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { fontFamily: { sans: ['Tajawal', 'sans-serif'] } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-2xl mx-auto p-4">
+        <header class="flex justify-between items-center mb-8 pt-4">
+            <h1 class="text-2xl font-bold text-blue-600">QCM Vaccination</h1>
+            <a href="/admin" class="text-sm text-slate-400 hover:text-blue-500">Admin</a>
+        </header>
+
+        <div id="loading" class="text-center py-10 text-xl animate-pulse">Chargement des questions...</div>
+
+        <div id="quiz-container" class="space-y-6 hidden">
+            </div>
+    </div>
+
+    <script>
+        let questions = [];
+
+        async function init() {
+            const res = await fetch('/api/questions');
+            questions = await res.json();
+            document.getElementById('loading').classList.add('hidden');
+            const container = document.getElementById('quiz-container');
+            container.classList.remove('hidden');
+            
+            questions.forEach((q, index) => {
+                const card = createQuestionCard(q, index);
+                container.appendChild(card);
+            });
+        }
+
+        function createQuestionCard(q, index) {
+            const div = document.createElement('div');
+            div.className = "bg-white p-6 rounded-xl shadow-sm border border-slate-200";
+            
+            let optionsHtml = '';
+            q.options.forEach((opt, i) => {
+                optionsHtml += `
+                    <button onclick="checkAnswer(${q.id}, ${i}, ${q.correctIndex}, this, 'expl-${q.id}')" 
+                        class="w-full text-left p-3 mb-2 rounded-lg border border-slate-200 hover:bg-blue-50 transition-colors option-btn-${q.id}">
+                        ${opt}
+                    </button>`;
+            });
+
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-lg font-bold">Question ${index + 1}</h2>
+                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${q.type || 'QCM'}</span>
+                </div>
+                <p class="mb-6 text-lg">${q.question}</p>
+                <div class="space-y-2 mb-4">${optionsHtml}</div>
+                <div id="expl-${q.id}" class="hidden mt-4 p-4 bg-green-50 text-green-800 rounded-lg border border-green-200 text-sm">
+                    <strong>Explication:</strong> ${q.explanation}
+                </div>
+            `;
+            return div;
+        }
+
+        async function checkAnswer(qId, selectedIndex, correctIndex, btnElement, explId) {
+            // Disable all buttons for this question
+            const buttons = document.querySelectorAll(`.option-btn-${qId}`);
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = selectedIndex === correctIndex;
+
+            // Visual feedback
+            if (isCorrect) {
+                btnElement.classList.remove('border-slate-200', 'hover:bg-blue-50');
+                btnElement.classList.add('bg-green-500', 'text-white', 'border-green-600');
+            } else {
+                btnElement.classList.remove('border-slate-200', 'hover:bg-blue-50');
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600');
+                // Highlight correct one
+                buttons[correctIndex].classList.add('bg-green-500', 'text-white', 'border-green-600');
+            }
+
+            // Show explanation
+            document.getElementById(explId).classList.remove('hidden');
+
+            // Send stats to backend (Silent update)
+            await fetch('/api/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: qId, isCorrect })
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
