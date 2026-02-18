@@ -23,45 +23,6 @@
             to { opacity: 1; transform: translateY(0); } 
         }
         
-        /* Mask animation for admin/stats sections */
-        .mask-reveal {
-            animation: maskReveal 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes maskReveal {
-            0% { 
-                opacity: 0;
-                transform: scale(0.95);
-                filter: blur(10px);
-            }
-            100% { 
-                opacity: 1;
-                transform: scale(1);
-                filter: blur(0);
-            }
-        }
-        
-        /* Secret admin trigger - completely hidden but interactive */
-        .secret-trigger {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: transparent;
-            cursor: pointer;
-            z-index: 9999;
-            opacity: 0.05;
-            transition: opacity 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        .secret-trigger:hover {
-            opacity: 0.3;
-            background: rgba(0,0,0,0.1);
-        }
-        
         /* Statistics cards hover effect */
         .stat-card {
             transition: all 0.3s ease;
@@ -73,25 +34,7 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
-        /* Admin password modal */
-        .admin-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-        
-        .admin-modal.active {
-            display: flex;
-        }
-        
+        /* Admin panel */
         .admin-panel {
             position: fixed;
             top: 0;
@@ -188,7 +131,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        /* Tablet size */
         @media (min-width: 768px) {
             .question-grid-item {
                 width: 50px;
@@ -198,7 +140,6 @@
             }
         }
         
-        /* Desktop size */
         @media (min-width: 1024px) {
             .question-grid-item {
                 width: 55px;
@@ -246,7 +187,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
-        /* Scroll buttons for desktop */
         .scroll-btn {
             background: white;
             border: none;
@@ -279,7 +219,6 @@
             }
         }
         
-        /* Improved option cards for mobile */
         .option-btn {
             width: 100%;
             text-align: left;
@@ -341,7 +280,6 @@
             border-color: #0d9488;
         }
         
-        /* Responsive text sizes */
         .question-text {
             font-size: 1.8rem;
             line-height: 1.3;
@@ -376,7 +314,6 @@
             }
         }
         
-        /* Responsive container padding */
         .container-padding {
             padding-left: 0.75rem;
             padding-right: 0.75rem;
@@ -395,55 +332,9 @@
                 padding-right: 2rem;
             }
         }
-        
-        /* Touch-friendly navigation */
-        .nav-button {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-        }
-        
-        @media (min-width: 768px) {
-            .nav-button {
-                padding: 1rem 2rem;
-                font-size: 1.25rem;
-            }
-        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900">
-
-    <!-- Secret Admin Trigger (invisible button) -->
-    <div class="secret-trigger" id="secretTrigger" title="🔐 Zone Réservée">
-        <i class="fa-solid fa-key"></i>
-    </div>
-
-    <!-- Admin Password Modal -->
-    <div class="admin-modal" id="adminModal">
-        <div class="bg-white rounded-[3rem] p-8 md:p-16 max-w-md w-full mx-4 shadow-2xl">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 md:w-24 md:h-24 bg-teal-900 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fa-solid fa-lock text-white text-3xl md:text-4xl"></i>
-                </div>
-                <h2 class="text-3xl md:text-4xl font-black text-teal-950 mb-2">Accès Professeur</h2>
-                <p class="text-lg md:text-xl text-slate-500">Veuillez entrer le code d'accès</p>
-            </div>
-            
-            <input type="password" id="adminPassword" 
-                   class="w-full p-4 md:p-6 text-xl md:text-2xl border-4 border-slate-200 rounded-2xl mb-6 text-center font-bold"
-                   placeholder="••••••••">
-            
-            <div class="flex flex-col md:flex-row gap-4">
-                <button onclick="closeAdminModal()" 
-                        class="flex-1 py-4 md:py-6 text-xl md:text-2xl bg-slate-200 rounded-2xl font-bold hover:bg-slate-300">
-                    Annuler
-                </button>
-                <button onclick="verifyAdminPassword()" 
-                        class="flex-1 py-4 md:py-6 text-xl md:text-2xl bg-teal-900 text-white rounded-2xl font-bold hover:bg-teal-800">
-                    Accéder
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Admin Panel (Hidden by default) -->
     <div class="admin-panel" id="adminPanel">
@@ -462,7 +353,7 @@
                 </span>
             </div>
             
-            <!-- Admin Login Status -->
+            <!-- Admin Login Section (always visible) -->
             <div id="adminLoginSection" class="mb-10">
                 <div class="bg-slate-100 p-6 md:p-8 rounded-[2rem]">
                     <h2 class="text-2xl md:text-3xl font-bold mb-4">Authentification Requise</h2>
@@ -591,7 +482,7 @@
                 <button onclick="openStatsPanel()" class="opacity-40 hover:opacity-100 transition-all hover:scale-110 text-xl md:text-4xl p-2" title="Voir les statistiques">
                     <i class="fa-solid fa-chart-simple"></i>
                 </button>
-                <button onclick="openAdminModal()" class="opacity-40 hover:opacity-100 transition-all hover:scale-110 text-xl md:text-4xl p-2" title="Accès Professeur">
+                <button onclick="openAdminPanel()" class="opacity-40 hover:opacity-100 transition-all hover:scale-110 text-xl md:text-4xl p-2" title="Accès Professeur">
                     <i class="fa-solid fa-sliders"></i>
                 </button>
             </div>
@@ -682,11 +573,6 @@
         </div>
     </div>
 
-    <!-- Secret Trigger Indicator (optional) -->
-    <div class="fixed bottom-4 left-4 text-xs text-slate-400 opacity-30">
-        🔐
-    </div>
-
     <script>
         // ==================== CONFIGURATION ====================
         const API_BASE = 'https://pevqcm-api.ferhathamza17.workers.dev/api';
@@ -719,24 +605,6 @@
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', () => {
             loadQuestions();
-            
-            // Secret trigger click (bottom left invisible button)
-            document.getElementById('secretTrigger').addEventListener('click', () => {
-                // Secret sequence: click 3 times quickly
-                if(window.secretClickCount === undefined) window.secretClickCount = 0;
-                window.secretClickCount++;
-                
-                if(window.secretClickCount >= 3) {
-                    openAdminModal();
-                    window.secretClickCount = 0;
-                }
-                
-                // Reset after 2 seconds
-                clearTimeout(window.secretTimer);
-                window.secretTimer = setTimeout(() => {
-                    window.secretClickCount = 0;
-                }, 2000);
-            });
         });
 
         // ==================== SCROLL FUNCTION FOR GRID ====================
@@ -938,19 +806,9 @@
         }
 
         // ==================== PANEL FUNCTIONS ====================
-        function openAdminModal() {
-            document.getElementById('adminModal').classList.add('active');
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.remove('active');
-            document.getElementById('adminPassword').value = '';
-        }
-
         function openAdminPanel() {
             document.getElementById('adminPanel').classList.add('active');
             document.body.style.overflow = 'hidden';
-            loadAdminQuestions();
         }
 
         function openStatsPanel() {
@@ -960,27 +818,17 @@
         }
 
         function closeAllPanels() {
-            document.getElementById('adminModal').classList.remove('active');
             document.getElementById('adminPanel').classList.remove('active');
             document.getElementById('statsPanel').classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
         // ==================== ADMIN FUNCTIONS ====================
-        function verifyAdminPassword() {
-            const password = document.getElementById('adminPassword').value;
-            if (password === ADMIN_PASSWORD) {
-                closeAdminModal();
-                openAdminPanel();
-            } else {
-                alert('Mot de passe incorrect');
-            }
-        }
-
         function adminLogin() {
             const password = document.getElementById('adminMasterPassword').value;
             if (password === ADMIN_PASSWORD) {
                 adminLoggedIn = true;
+                adminToken = password;
                 document.getElementById('adminLoginSection').classList.add('hidden');
                 document.getElementById('adminContent').classList.remove('hidden');
                 loadAdminQuestions();
@@ -990,12 +838,28 @@
         }
 
         async function loadAdminQuestions() {
-            if (!adminLoggedIn) return;
+            if (!adminLoggedIn || !adminToken) return;
             
             try {
                 const response = await fetch(`${API_BASE}/questions`, {
-                    headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+                    headers: { 
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Session expirée. Veuillez vous reconnecter.');
+                        adminLoggedIn = false;
+                        adminToken = null;
+                        document.getElementById('adminLoginSection').classList.remove('hidden');
+                        document.getElementById('adminContent').classList.add('hidden');
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 let html = '';
@@ -1019,11 +883,11 @@
                                 <div class="flex gap-2 self-end md:self-start">
                                     <button onclick="editQuestion(${q.id})" 
                                             class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm md:text-base">
-                                        <i class="fa-solid fa-edit"></i>
+                                        <i class="fa-solid fa-edit"></i> Éditer
                                     </button>
                                     <button onclick="deleteQuestion(${q.id})" 
                                             class="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 text-sm md:text-base">
-                                        <i class="fa-solid fa-trash"></i>
+                                        <i class="fa-solid fa-trash"></i> Supprimer
                                     </button>
                                 </div>
                             </div>
@@ -1033,6 +897,7 @@
                 document.getElementById('questionsList').innerHTML = html;
             } catch (error) {
                 console.error('Error loading admin questions:', error);
+                alert('Erreur lors du chargement des questions');
             }
         }
 
@@ -1069,6 +934,11 @@
                 return;
             }
 
+            if (correctIndex < 0 || correctIndex > 3) {
+                alert('L\'index correct doit être entre 0 et 3');
+                return;
+            }
+
             const data = { question, options, correctIndex, explanation };
 
             try {
@@ -1079,26 +949,62 @@
                     method,
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${ADMIN_PASSWORD}`
+                        'Authorization': `Bearer ${adminToken}`
                     },
                     body: JSON.stringify(data)
                 });
 
-                if (response.ok) {
-                    cancelQuestionForm();
-                    loadAdminQuestions();
-                    loadQuestions(); // Reload main questions
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Session expirée. Veuillez vous reconnecter.');
+                        adminLoggedIn = false;
+                        adminToken = null;
+                        document.getElementById('adminLoginSection').classList.remove('hidden');
+                        document.getElementById('adminContent').classList.add('hidden');
+                        return;
+                    }
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
+
+                cancelQuestionForm();
+                await loadAdminQuestions();
+                await loadQuestions(); // Reload main questions
+                alert(id ? 'Question modifiée avec succès!' : 'Question ajoutée avec succès!');
+                
             } catch (error) {
                 console.error('Error saving question:', error);
+                alert('Erreur lors de l\'enregistrement: ' + error.message);
             }
         }
 
         async function editQuestion(id) {
+            if (!adminToken) {
+                alert('Veuillez vous reconnecter');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/questions/${id}`, {
-                    headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Session expirée. Veuillez vous reconnecter.');
+                        adminLoggedIn = false;
+                        adminToken = null;
+                        document.getElementById('adminLoginSection').classList.remove('hidden');
+                        document.getElementById('adminContent').classList.add('hidden');
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const q = await response.json();
                 const options = JSON.parse(q.options);
 
@@ -1112,23 +1018,49 @@
                 document.getElementById('explanationText').value = q.explanation || '';
                 
                 document.getElementById('questionForm').classList.remove('hidden');
+                
             } catch (error) {
                 console.error('Error loading question:', error);
+                alert('Erreur lors du chargement de la question');
             }
         }
 
         async function deleteQuestion(id) {
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette question ?')) return;
+            
+            if (!adminToken) {
+                alert('Veuillez vous reconnecter');
+                return;
+            }
 
             try {
-                await fetch(`${API_BASE}/questions/${id}`, {
+                const response = await fetch(`${API_BASE}/questions/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+                    headers: { 
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
-                loadAdminQuestions();
-                loadQuestions();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Session expirée. Veuillez vous reconnecter.');
+                        adminLoggedIn = false;
+                        adminToken = null;
+                        document.getElementById('adminLoginSection').classList.remove('hidden');
+                        document.getElementById('adminContent').classList.add('hidden');
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                await loadAdminQuestions();
+                await loadQuestions();
+                alert('Question supprimée avec succès!');
+                
             } catch (error) {
                 console.error('Error deleting question:', error);
+                alert('Erreur lors de la suppression');
             }
         }
 
@@ -1193,9 +1125,6 @@
 
         // ==================== EXPOSE GLOBALLY ====================
         window.goToQuestion = goToQuestion;
-        window.openAdminModal = openAdminModal;
-        window.closeAdminModal = closeAdminModal;
-        window.verifyAdminPassword = verifyAdminPassword;
         window.openAdminPanel = openAdminPanel;
         window.openStatsPanel = openStatsPanel;
         window.closeAllPanels = closeAllPanels;
