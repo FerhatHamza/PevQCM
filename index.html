@@ -573,7 +573,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         // ==================== CONFIGURATION ====================
         const API_BASE = 'https://pevqcm-api.ferhathamza17.workers.dev/api';
         const ADMIN_PASSWORD = 'admin123'; // Change this in production!
@@ -837,8 +837,19 @@
             }
         }
 
+        function adminLogout() {
+            adminLoggedIn = false;
+            adminToken = null;
+            document.getElementById('adminLoginSection').classList.remove('hidden');
+            document.getElementById('adminContent').classList.add('hidden');
+            document.getElementById('adminMasterPassword').value = '';
+        }
+
         async function loadAdminQuestions() {
-            if (!adminLoggedIn || !adminToken) return;
+            if (!adminLoggedIn || !adminToken) {
+                adminLogout();
+                return;
+            }
             
             try {
                 const response = await fetch(`${API_BASE}/questions`, {
@@ -851,10 +862,7 @@
                 if (!response.ok) {
                     if (response.status === 401) {
                         alert('Session expirée. Veuillez vous reconnecter.');
-                        adminLoggedIn = false;
-                        adminToken = null;
-                        document.getElementById('adminLoginSection').classList.remove('hidden');
-                        document.getElementById('adminContent').classList.add('hidden');
+                        adminLogout();
                         return;
                     }
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -918,6 +926,12 @@
         }
 
         async function saveQuestion() {
+            if (!adminLoggedIn || !adminToken) {
+                alert('Veuillez vous connecter d\'abord');
+                adminLogout();
+                return;
+            }
+
             const id = document.getElementById('editQuestionId').value;
             const question = document.getElementById('questionText').value;
             const options = [
@@ -945,6 +959,8 @@
                 const url = id ? `${API_BASE}/questions/${id}` : `${API_BASE}/questions`;
                 const method = id ? 'PUT' : 'POST';
 
+                console.log('Saving question with token:', adminToken); // Debug log
+                
                 const response = await fetch(url, {
                     method,
                     headers: {
@@ -957,10 +973,7 @@
                 if (!response.ok) {
                     if (response.status === 401) {
                         alert('Session expirée. Veuillez vous reconnecter.');
-                        adminLoggedIn = false;
-                        adminToken = null;
-                        document.getElementById('adminLoginSection').classList.remove('hidden');
-                        document.getElementById('adminContent').classList.add('hidden');
+                        adminLogout();
                         return;
                     }
                     const errorData = await response.json();
@@ -979,12 +992,15 @@
         }
 
         async function editQuestion(id) {
-            if (!adminToken) {
-                alert('Veuillez vous reconnecter');
+            if (!adminLoggedIn || !adminToken) {
+                alert('Veuillez vous connecter d\'abord');
+                adminLogout();
                 return;
             }
             
             try {
+                console.log('Editing question with token:', adminToken); // Debug log
+                
                 const response = await fetch(`${API_BASE}/questions/${id}`, {
                     method: 'GET',
                     headers: { 
@@ -996,10 +1012,7 @@
                 if (!response.ok) {
                     if (response.status === 401) {
                         alert('Session expirée. Veuillez vous reconnecter.');
-                        adminLoggedIn = false;
-                        adminToken = null;
-                        document.getElementById('adminLoginSection').classList.remove('hidden');
-                        document.getElementById('adminContent').classList.add('hidden');
+                        adminLogout();
                         return;
                     }
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1028,12 +1041,15 @@
         async function deleteQuestion(id) {
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette question ?')) return;
             
-            if (!adminToken) {
-                alert('Veuillez vous reconnecter');
+            if (!adminLoggedIn || !adminToken) {
+                alert('Veuillez vous connecter d\'abord');
+                adminLogout();
                 return;
             }
 
             try {
+                console.log('Deleting question with token:', adminToken); // Debug log
+                
                 const response = await fetch(`${API_BASE}/questions/${id}`, {
                     method: 'DELETE',
                     headers: { 
@@ -1045,10 +1061,7 @@
                 if (!response.ok) {
                     if (response.status === 401) {
                         alert('Session expirée. Veuillez vous reconnecter.');
-                        adminLoggedIn = false;
-                        adminToken = null;
-                        document.getElementById('adminLoginSection').classList.remove('hidden');
-                        document.getElementById('adminContent').classList.add('hidden');
+                        adminLogout();
                         return;
                     }
                     throw new Error(`HTTP error! status: ${response.status}`);
