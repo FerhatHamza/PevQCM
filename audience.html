@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz – Participation en direct</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Tajawal', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-teal-50 to-blue-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <div id="joinScreen" class="text-center">
+            <div class="bg-white rounded-3xl p-8 shadow-xl">
+                <h1 class="text-3xl font-black text-teal-900 mb-4">Session en direct</h1>
+                <p class="text-xl mb-6">Entrez le code de session</p>
+                <input type="text" id="sessionCode" placeholder="Ex: ABC123" class="w-full p-4 text-center text-2xl border-2 rounded-xl mb-4">
+                <button onclick="joinSession()" class="w-full bg-teal-700 text-white py-4 rounded-xl text-xl font-bold">Rejoindre</button>
+            </div>
+        </div>
+
+        <div id="quizScreen" class="hidden bg-white rounded-3xl p-6 shadow-xl">
+            <div class="mb-6 flex justify-between items-center">
+                <span class="text-sm bg-teal-100 px-3 py-1 rounded-full" id="questionCounter">Question 1 / ?</span>
+                <span class="text-xs text-gray-500">Session en direct</span>
+            </div>
+            <h2 id="questionText" class="text-2xl font-bold mb-8">Chargement...</h2>
+            <div id="optionsContainer" class="space-y-4"></div>
+            <div id="finishedMessage" class="hidden text-center py-8">
+                <i class="fa-solid fa-check-circle text-green-600 text-6xl mb-4"></i>
+                <p class="text-xl">Merci pour votre participation !</p>
+            </div>
+            <div class="mt-8 text-center text-sm text-gray-400">
+                Vos réponses sont anonymes.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://pevqcm-api.ferhathamza17.workers.dev/api';
+        let sessionId = null;
+        let currentQuestion = null;
+        let totalQuestions = 0;
+
+        function joinSession() {
+            const code = document.getElementById('sessionCode').value.trim();
+            if (!code) return;
+            sessionId = code;
+            document.getElementById('joinScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            loadCurrentQuestion();
+        }
+
+        async function loadCurrentQuestion() {
+            try {
+                const res = await fetch(`${API_BASE}/live/current-question?sessionId=${sessionId}`);
+                const data = await res.json();
+                if (data.finished) {
+                    document.getElementById('questionText').classList.add('hidden');
+                    document.getElementById('optionsContainer').classList.add('hidden');
+                    document.getElementById('finishedMessage').classList.remove('hidden');
+                    return;
+                }
+                currentQuestion = data.currentQuestion;
+                totalQuestions = data.total;
+                document.getElementById('questionCounter').innerText = `Question ${data.questionNumber} / ${totalQuestions}`;
+                document.getElementById('questionText').innerText = currentQuestion.question;
+                renderOptions(currentQuestion.options);
+            } catch (err) {
+                console.error(err);
+                alert('Erreur de chargement. Vérifiez le code.');
+            }
+        }
+
+        function renderOptions(options) {
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 bg-gray-50 border-2 border-gray-200 rounded-xl hover:bg-teal-50 hover:border-teal-400 transition flex items-center gap-4';
+                btn.innerHTML = `<span class="font-bold text-teal-700 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow">${String.fromCharCode(65+idx)}</span><span class="flex-1">${opt}</span>`;
+                btn.onclick = () => submitAnswer(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        async function submitAnswer(selectedIdx) {
+            try {
+                await fetch(`${API_BASE}/live/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        questionId: currentQuestion.id,
+                        selectedOption: selectedIdx
+                    })
+                });
+                // Load next question
+                await loadCurrentQuestion();
+            } catch (err) {
+                console.error(err);
+                alert('Erreur lors de l’envoi. Réessayez.');
+            }
+        }
+
+        // Auto reload if URL contains ?sessionId=...
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSession = urlParams.get('sessionId');
+        if (urlSession) {
+            sessionId = urlSession;
+            document.getElementById('joinScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            loadCurrentQuestion();
+        }
+    </script>
+</body>
+</html>
