@@ -332,6 +332,77 @@
                 padding-right: 2rem;
             }
         }
+
+        /* QR Code Container Styles */
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin: 20px auto;
+        }
+        
+        .qr-container canvas,
+        .qr-container img {
+            width: 200px;
+            height: 200px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        /* Live results animation */
+        .live-result-card {
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Progress bar animation in live results */
+        .live-progress-bar {
+            transition: width 0.5s ease-out;
+        }
+        
+        /* Session info styling */
+        .session-info {
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .session-code {
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        /* Responsive QR container */
+        @media (max-width: 640px) {
+            .qr-container canvas,
+            .qr-container img {
+                width: 150px;
+                height: 150px;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900">
@@ -470,6 +541,85 @@
         </div>
     </div>
 
+    <!-- Live Session Panel -->
+        <div class="stats-panel" id="livePanel">
+            <button class="close-panel" onclick="closeLivePanel()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+                <h1 class="text-3xl md:text-5xl font-black text-teal-950 mb-8">
+                    <i class="fa-solid fa-chalkboard-user mr-4 text-teal-600"></i>
+                    Session en direct
+                </h1>
+                
+                <div id="liveControl" class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+                    <!-- No Session State -->
+                    <div id="noSession" class="text-center">
+                        <div class="mb-6">
+                            <i class="fa-solid fa-video text-6xl text-teal-600 mb-4"></i>
+                            <h2 class="text-2xl font-bold mb-2">Aucune session active</h2>
+                            <p class="text-gray-600 mb-6">Démarrez une nouvelle session pour permettre aux participants de rejoindre</p>
+                        </div>
+                        <button onclick="startLiveSession()" 
+                                class="bg-teal-700 text-white px-8 py-4 rounded-xl text-xl font-bold hover:bg-teal-800 transition transform hover:scale-105">
+                            <i class="fa-solid fa-play mr-2"></i>
+                            Démarrer une nouvelle session
+                        </button>
+                    </div>
+                    
+                    <!-- Active Session State -->
+                    <div id="activeSession" class="hidden">
+                        <!-- Session Info Card -->
+                        <div class="session-info mb-6">
+                            <div class="text-center">
+                                <i class="fa-solid fa-qrcode text-4xl mb-3"></i>
+                                <h3 class="text-xl font-bold mb-2">Session en cours</h3>
+                                <div class="qr-container" id="qrcode"></div>
+                                <div class="mt-4">
+                                    <p class="text-sm opacity-90 mb-2">Code de session :</p>
+                                    <div class="session-code" id="sessionCodeDisplay"></div>
+                                </div>
+                                <div class="mt-4">
+                                    <p class="text-sm opacity-90 mb-2">Lien direct :</p>
+                                    <p id="joinUrlDisplay" class="text-sm break-all bg-black/20 p-2 rounded"></p>
+                                </div>
+                                <div class="mt-3 text-xs opacity-75">
+                                    <i class="fa-solid fa-mobile-alt mr-1"></i>
+                                    Scannez le QR code ou partagez le lien
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Control Buttons -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                            <button onclick="endLiveSession()" 
+                                    class="bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-red-700 transition transform hover:scale-105">
+                                <i class="fa-solid fa-stop mr-2"></i>
+                                Terminer la session
+                            </button>
+                            <button onclick="refreshLiveResults()" 
+                                    class="bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition transform hover:scale-105">
+                                <i class="fa-solid fa-rotate-right mr-2"></i>
+                                Actualiser les résultats
+                            </button>
+                        </div>
+                        
+                        <!-- Live Results -->
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 flex items-center">
+                                <i class="fa-solid fa-chart-line text-teal-600 mr-2"></i>
+                                Résultats en direct
+                                <span class="text-sm font-normal text-gray-500 ml-3" id="lastUpdateTime"></span>
+                            </h3>
+                            <div id="liveResults" class="space-y-4">
+                                <!-- Results will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
     <!-- Main Quiz Interface -->
     <nav class="bg-teal-950 text-white p-4 md:p-10 shadow-2xl border-b-4 border-teal-500">
         <div class="container mx-auto flex justify-between items-center px-2 md:px-10">
@@ -481,6 +631,9 @@
             <div class="flex gap-2 md:gap-4">
                 <button onclick="openStatsPanel()" class="opacity-40 hover:opacity-100 transition-all hover:scale-110 text-xl md:text-4xl p-2" title="Voir les statistiques">
                     <i class="fa-solid fa-chart-simple"></i>
+                </button>
+                <button onclick="openLivePanel()" class="opacity-40 hover:opacity-100 transition-all hover:scale-110 text-xl md:text-4xl p-2" title="Session en direct">
+                    <i class="fa-solid fa-chalkboard-user"></i>
                 </button>
                 <button onclick="openAdminPanel()" class="opacity-40 hover:opacity-100 transition-all hover:scale-110 text-xl md:text-4xl p-2" title="Accès Professeur">
                     <i class="fa-solid fa-sliders"></i>
@@ -1136,6 +1289,337 @@
             }
         }
 
+// ==================== QR CODE LIBRARY LOADER ====================
+let qrLibraryLoaded = false;
+
+function loadQRCodeLibrary() {
+    return new Promise((resolve, reject) => {
+        // Check if already loaded
+        if (typeof QRCode !== 'undefined') {
+            qrLibraryLoaded = true;
+            resolve();
+            return;
+        }
+        
+        // Check if script is already loading
+        if (document.querySelector('script[src*="qrcode"]')) {
+            // Wait for it to load
+            const checkInterval = setInterval(() => {
+                if (typeof QRCode !== 'undefined') {
+                    clearInterval(checkInterval);
+                    qrLibraryLoaded = true;
+                    resolve();
+                }
+            }, 100);
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                reject(new Error('QR Code library load timeout'));
+            }, 5000);
+            return;
+        }
+        
+        // Load the library
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+        script.onload = () => {
+            qrLibraryLoaded = true;
+            resolve();
+        };
+        script.onerror = () => {
+            reject(new Error('Failed to load QR Code library'));
+        };
+        document.head.appendChild(script);
+    });
+}
+
+
+        // ==================== QRCode FUNCTIONS ====================
+        function generateQRCode(elementId, text) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    await loadQRCodeLibrary();
+                    const element = document.getElementById(elementId);
+                    if (!element) {
+                        reject(new Error('Element not found'));
+                        return;
+                    }
+                    // Clear previous QR code
+                    element.innerHTML = '';
+                    // Generate new QR code
+                    new QRCode(element, {
+                        text: text,
+                        width: 200,
+                        height: 200,
+                        colorDark: '#0f766e',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    resolve();
+                } catch (error) {
+                    console.error('QR generation error:', error);
+                    // Fallback: display text instead of QR
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.innerHTML = `
+                            <div class="text-center p-4 bg-gray-100 rounded">
+                                <p class="text-sm text-gray-600 mb-2">QR code unavailable</p>
+                                <p class="text-xs break-all">${text}</p>
+                            </div>
+                        `;
+                    }
+                    reject(error);
+                }
+            });
+        }
+  // ==================== LIVE SESSION VARIABLES ====================
+        let activeSessionId = null;
+        let liveInterval = null;
+        let currentLiveData = null;
+        
+        // ==================== LIVE PANEL FUNCTIONS ====================
+        function openLivePanel() {
+            if (!adminLoggedIn || !adminToken) {
+                alert('Veuillez vous connecter en tant qu\'administrateur d\'abord.');
+                openAdminPanel();
+                return;
+            }
+            document.getElementById('livePanel').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Check if there's an active session stored
+            if (activeSessionId) {
+                refreshLiveResults();
+                startLivePolling();
+            }
+        }
+        
+        function closeLivePanel() {
+            document.getElementById('livePanel').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            stopLivePolling();
+        }
+        
+        function startLivePolling() {
+            if (liveInterval) clearInterval(liveInterval);
+            liveInterval = setInterval(() => {
+                if (activeSessionId && document.getElementById('livePanel').classList.contains('active')) {
+                    refreshLiveResults();
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+        
+        function stopLivePolling() {
+            if (liveInterval) {
+                clearInterval(liveInterval);
+                liveInterval = null;
+            }
+        }
+        
+        // ==================== LIVE SESSION MANAGEMENT ====================
+        async function startLiveSession() {
+            if (!adminLoggedIn || !adminToken) {
+                alert('Veuillez vous connecter en tant qu\'administrateur d\'abord.');
+                openAdminPanel();
+                return;
+            }
+            
+            // Show loading state
+            const startBtn = event.target;
+            const originalText = startBtn.innerHTML;
+            startBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Démarrage...';
+            startBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/live/start`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                activeSessionId = data.sessionId;
+                
+                // Switch UI
+                document.getElementById('noSession').classList.add('hidden');
+                document.getElementById('activeSession').classList.remove('hidden');
+                
+                // Display session info
+                document.getElementById('sessionCodeDisplay').innerText = activeSessionId;
+                const joinUrl = `${window.location.origin}/audience.html?sessionId=${activeSessionId}`;
+                document.getElementById('joinUrlDisplay').innerHTML = `<a href="${joinUrl}" target="_blank" class="text-teal-200 underline break-all">${joinUrl}</a>`;
+                
+                // Generate QR code
+                try {
+                    await generateQRCode('qrcode', joinUrl);
+                } catch (qrError) {
+                    console.error('QR generation failed:', qrError);
+                    document.getElementById('qrcode').innerHTML = `
+                        <div class="text-center p-4 bg-white/20 rounded">
+                            <p class="text-sm">Lien: <br>${joinUrl.substring(0, 50)}...</p>
+                        </div>
+                    `;
+                }
+                
+                // Load initial results
+                await refreshLiveResults();
+                startLivePolling();
+                
+            } catch (error) {
+                console.error('Error starting live session:', error);
+                alert('Erreur lors du démarrage de la session: ' + error.message);
+            } finally {
+                startBtn.innerHTML = originalText;
+                startBtn.disabled = false;
+            }
+        }
+        
+        async function endLiveSession() {
+            if (!activeSessionId) return;
+            
+            if (!confirm('Êtes-vous sûr de vouloir terminer cette session ? Les participants ne pourront plus répondre.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/live/end`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify({ sessionId: activeSessionId })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Reset session
+                stopLivePolling();
+                activeSessionId = null;
+                
+                // Switch back to no session UI
+                document.getElementById('noSession').classList.remove('hidden');
+                document.getElementById('activeSession').classList.add('hidden');
+                document.getElementById('qrcode').innerHTML = '';
+                
+                alert('Session terminée avec succès.');
+                
+            } catch (error) {
+                console.error('Error ending live session:', error);
+                alert('Erreur lors de la fin de la session: ' + error.message);
+            }
+        }
+        
+        async function refreshLiveResults() {
+            if (!activeSessionId) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/live/results?sessionId=${activeSessionId}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        // Session might have ended
+                        stopLivePolling();
+                        activeSessionId = null;
+                        document.getElementById('noSession').classList.remove('hidden');
+                        document.getElementById('activeSession').classList.add('hidden');
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                currentLiveData = data;
+                
+                // Update last update time
+                const now = new Date();
+                document.getElementById('lastUpdateTime').innerHTML = `Dernière mise à jour: ${now.toLocaleTimeString()}`;
+                
+                // Render results
+                renderLiveResults(data.stats);
+                
+            } catch (error) {
+                console.error('Error refreshing live results:', error);
+            }
+        }
+        
+        function renderLiveResults(stats) {
+            const container = document.getElementById('liveResults');
+            if (!container) return;
+            
+            if (!stats || stats.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fa-solid fa-chart-simple text-4xl mb-2"></i>
+                        <p>Aucune réponse pour le moment</p>
+                        <p class="text-sm">Les résultats apparaîtront ici en temps réel</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            stats.forEach((stat, idx) => {
+                const total = stat.counts.reduce((a, b) => a + b, 0);
+                const maxCount = Math.max(...stat.counts, 1);
+                
+                const card = document.createElement('div');
+                card.className = 'live-result-card bg-gray-50 p-4 md:p-6 rounded-xl shadow-lg border border-gray-200';
+                card.style.animationDelay = `${idx * 0.1}s`;
+                
+                // Question header
+                let optionsHtml = '';
+                const letters = ['A', 'B', 'C', 'D'];
+                
+                stat.options.forEach((opt, optIdx) => {
+                    const count = stat.counts[optIdx];
+                    const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                    const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                    
+                    // Determine bar color based on percentage
+                    let barColor = 'bg-teal-600';
+                    if (percentage > 75) barColor = 'bg-green-600';
+                    else if (percentage > 50) barColor = 'bg-teal-600';
+                    else if (percentage > 25) barColor = 'bg-yellow-600';
+                    else barColor = 'bg-gray-500';
+                    
+                    optionsHtml += `
+                        <div class="mb-3">
+                            <div class="flex justify-between text-sm mb-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-teal-700">${letters[optIdx]}</span>
+                                    <span class="text-gray-700">${opt}</span>
+                                </div>
+                                <span class="font-medium text-gray-600">${count} (${percentage}%)</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                <div class="live-progress-bar ${barColor} h-3 rounded-full" style="width: ${barWidth}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                card.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="font-bold text-lg md:text-xl text-gray-800 mb-2">${stat.questionText}</h3>
+                        <div class="text-xs text-gray-500 mb-3">Total des réponses: ${total}</div>
+                    </div>
+                    <div class="space-y-3">
+                        ${optionsHtml}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
         // ==================== EXPOSE GLOBALLY ====================
         window.goToQuestion = goToQuestion;
         window.openAdminPanel = openAdminPanel;
